@@ -14,10 +14,21 @@ def initializeProducer():
     return producer
 
 def sendToTopic(data):
-    producer = initializeProducer()
-    #print("Initialized Kafka Producer")
-    logging.debug("Initialized Kafka Producer")
-    producer.send(TOPIC_NAME, value = data)
-    #print("Sent data to topic {}".format(TOPIC_NAME))
-    logging.info("Sent data to topic {}".format(TOPIC_NAME))
-    sleep(5)
+    try:
+        producer = initializeProducer()
+        logging.debug("Initialized Kafka Producer")
+
+        for record in data:
+            producer.send(TOPIC_NAME, value = record)
+
+        logging.info(f'Sent data to topic {TOPIC_NAME}')
+        sleep(5)
+    except BufferError as error:
+        logging.exception(error)
+        print(f'Error producing message: {error}')
+    except KafkaError as error:
+        logging.exception(error)
+        print(f'Error producing message: {error}')
+    except Exception as error:
+        logging.exception(error)
+        print(f'Error producing message: {error}')

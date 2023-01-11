@@ -11,17 +11,16 @@ BAD_REQUEST_CODE = 400
 
 def registerRoutes(app):
     @app.route("/upload", methods = ["POST"])
-    def validationAPI():
+    def uploadFileForIngestion():
         try:
             file = request.files['file']
             data = json.loads(file.read())
 
             if data:
                 sendToTopic(data)
-
-            logging.info("Added to topic")
+                return jsonify({'message' : 'File uploaded Successfully and Sent to Kafka'}), SUCCESS_REQUEST_CODE
         
-            return jsonify({'message' : 'File uploaded Successfully'}), SUCCESS_REQUEST_CODE
+            return jsonify({'message' : 'File is empty'}), SUCCESS_REQUEST_CODE
         
         except ValueError as error:
             logging.exception(error)

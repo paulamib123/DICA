@@ -1,32 +1,31 @@
-from json import dumps  
+from json import dumps
 from kafka import KafkaProducer
 import logging 
 from time import sleep
 
-TOPIC_NAME = 'wireshark-data'
-SERVER_URL = 'localhost:9092'
+from src.config.configs import credentials
 
 def initializeProducer():
     producer = KafkaProducer(  
-        bootstrap_servers = [SERVER_URL],  
-        value_serializer = lambda x : dumps(x).encode('utf-8')  
+        bootstrap_servers = [credentials["kafkaServerURL"]],  
+        value_serializer = lambda x : dumps(x).encode('utf-8')
     )  
     return producer
 
 def sendToTopic(data):
     try:
+        
         producer = initializeProducer()
         logging.debug("Initialized Kafka Producer")
 
-        for record in data:
-            producer.send(TOPIC_NAME, value = record)
+        counter = 1
 
-        logging.info(f'Sent data to topic {TOPIC_NAME}')
-        sleep(5)
+        for record in data:
+            producer.send(credentials["kafkaTopic"], value = record)
+            logging.info(f'Sent record with id : {counter} to topic {credentials["kafkaTopic"]}')
+            counter += 1
+
     except BufferError as error:
-        logging.exception(error)
-        print(f'Error producing message: {error}')
-    except KafkaError as error:
         logging.exception(error)
         print(f'Error producing message: {error}')
     except Exception as error:

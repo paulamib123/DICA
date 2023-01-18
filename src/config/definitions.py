@@ -18,8 +18,9 @@ LOG_FILE_PATH = "/logs/api.log"
 LOG_FILE_NAME = ROOT_DIR + LOG_FILE_PATH
 
 def loggerConfig():
-        logging.basicConfig(filename=LOG_FILE_NAME, 
-                    filemode='w',
+        logging.basicConfig(
+                    #filename=LOG_FILE_NAME, 
+                    #filemode='w',
                     level=logging.INFO, 
                     format="%(asctime)s:%(levelname)s: %(message)s",
                     datefmt='%Y-%m-%d %H:%M:%S')

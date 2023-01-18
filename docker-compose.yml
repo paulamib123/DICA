@@ -1,0 +1,85 @@
+version: '3'
+services:
+  nifi:
+    image: apache/nifi:latest
+    container_name: nifi-sandbox
+    ports:
+      - "8080:8080"
+    networks:
+      - nifi-network
+    volumes:
+      - /home/paulami/snap/dbeaver-ce/218/.local/share/DBeaverData/drivers/maven/maven-central/org.postgresql:/opt/nifi/nifi-current/drivers
+      - /home/paulami/Documents/techsophy-internship/data/invalid_data:/opt/nifi/nifi-current/invalid_data
+
+    environment:
+      NIFI_WEB_HTTP_PORT: 8080
+      NIFI_REGISTRY_URL: http://nifi-registry:18080
+      NIFI_ZK_CONNECT_STRING: zookeeper:2181
+
+  nifi-registry:
+    image: apache/nifi-registry:latest
+    container_name: nfi-registry-sandbox
+    ports:
+      - "18080:18080"
+    networks:
+      - nifi-network
+    environment:
+      REGISTRY_ZK_CONNECT_STRING: zookeeper:2181
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeper-sandbox
+    ports:
+      - "2181:2181"
+    networks:
+      - nifi-network
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka-sandbox
+    ports:
+      - "9092:9092"
+    networks:
+      - nifi-network
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka-sandbox
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-sandbox:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    
+  web:
+    build: .
+    container_name: dica-sandbox
+    ports:
+      - "5000:5000"
+    depends_on:
+    - kafka
+    networks:
+    - nifi-network
+    volumes:
+      - /home/paulami/Documents/techsophy-internship/DICA/logs:/server/logs 
+    environment:
+      KAFKA_SERVER_URL: kafka-sandbox:9092
+      KAFKA_TOPIC: wireshark-data
+      FLASK_SERVER_HOST: 0.0.0.0
+      FLASK_SERVER_PORT: 5000
+
+  kafka-manager:
+    image: sheepkiller/kafka-manager
+    container_name: kafka-manager-sandbox
+    ports:
+      - "9000:9000"
+    networks:
+      - nifi-network
+    links:
+      - kafka:kafka
+      - zookeeper:zk
+    environment:
+      ZK_HOSTS: "zookeeper:2181"
+      APPLICATION_SECRET: "secret"
+
+networks:
+  nifi-network:
+    driver: bridge

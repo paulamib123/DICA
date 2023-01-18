@@ -14,16 +14,15 @@ def initializeProducer():
 
 def sendToTopic(data):
     try:
-        
         producer = initializeProducer()
         logging.debug("Initialized Kafka Producer")
 
-        counter = 1
+        count = 0
 
         for record in data:
             producer.send(credentials["kafkaTopic"], value = record)
-            logging.info(f'Sent record with id : {counter} to topic {credentials["kafkaTopic"]}')
-            counter += 1
+            count += 1
+            logging.info(f'Sent record with {count} to topic {credentials["kafkaTopic"]}')
 
     except BufferError as error:
         logging.exception(error)

@@ -16,4 +16,5 @@ if __name__ == "__main__":
     loggerConfig()
     host = credentials["flaskServerHost"]
     port = int(credentials["flaskServerPort"])
+    print("I'm inside main")
     app.run(host=host, port=port, debug=True)
